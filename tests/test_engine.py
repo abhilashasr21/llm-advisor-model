@@ -49,10 +49,10 @@ class TestEngine(unittest.TestCase):
             "Enterprise readiness status with gaps/actions\n"
         )
         result = engine.run(AdvisorRequest(prompt=prompt, compliance="strict"))
-        self.assertIn("Executive Decision", result.answer)
-        self.assertIn("Stage-wise Routing", result.answer)
-        self.assertIn("Top-3 Comparison", result.answer)
-        self.assertIn("Enterprise Readiness (Status + Gaps + Actions)", result.answer)
+        self.assertIn("Multi-Stage LLM Strategy Recommendation", result.answer)
+        self.assertIn("Stage-wise Model Routing", result.answer)
+        self.assertIn("Top-3 Portfolio Comparison", result.answer)
+        self.assertIn("Enterprise Readiness", result.answer)
 
 
 if __name__ == "__main__":

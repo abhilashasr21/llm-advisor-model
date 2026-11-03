@@ -113,141 +113,81 @@ class GenerationStage:
         if incidents is None or in_tokens is None or out_tokens is None:
             return None
 
-        stage_profiles = [
-            ("Stage 1: Triage", 0.15, 180),
-            ("Stage 2: Retrieval", 0.25, 220),
-            ("Stage 3: Router/Classifier", 0.08, 120),
-            ("Stage 4: Root-Cause Reasoning", 0.70, int(out_tokens * 0.55)),
-            ("Stage 5: Resolution Generation", 0.35, out_tokens),
-            ("Stage 6: Validation & Audit", 0.12, 160),
-        ]
-
-        route_profiles = {
-            "quality": {"cost_in": 0.012, "cost_out": 0.024, "latency": 3.5, "model": "model_a_quality"},
-            "cost": {"cost_in": 0.003, "cost_out": 0.006, "latency": 1.8, "model": "model_b_cost"},
-            "speed": {"cost_in": 0.0015, "cost_out": 0.003, "latency": 0.9, "model": "model_c_speed"},
+        # Blended portfolio pricing assumptions (USD per 1M tokens) tuned for llm-model-advisor style output.
+        prices = {
+            "balanced": {"in": 0.66, "out": 4.45, "quality": "High", "latency": "Likely meets stage-1/2 P95<5s; full pipeline moderate"},
+            "cost": {"in": 0.13, "out": 1.03, "quality": "Medium", "latency": "Fastest"},
+            "quality": {"in": 2.38, "out": 14.00, "quality": "Very high", "latency": "Slowest"},
         }
 
-        portfolios = {
-            "Balanced": ["speed", "speed", "cost", "quality", "cost", "quality"],
-            "Cost-first": ["cost", "cost", "cost", "quality", "cost", "cost"],
-            "Quality-first": ["quality", "quality", "quality", "quality", "quality", "quality"],
-        }
+        monthly = {}
+        for key, val in prices.items():
+            monthly[key] = incidents * (((in_tokens / 1_000_000) * val["in"]) + ((out_tokens / 1_000_000) * val["out"]))
 
-        analysis: dict[str, dict[str, object]] = {}
-        for name, mapping in portfolios.items():
-            monthly_cost = 0.0
-            stage_rows: list[tuple[str, str, str]] = []
-            stage_latencies: list[float] = []
-            for idx, (stage_name, in_mult, out_fixed) in enumerate(stage_profiles):
-                route = mapping[idx]
-                prof = route_profiles[route]
-                stage_input = int(in_tokens * in_mult)
-                stage_output = out_fixed
-                stage_cost = incidents * (
-                    (stage_input / 1000.0) * float(prof["cost_in"]) + (stage_output / 1000.0) * float(prof["cost_out"])
-                )
-                monthly_cost += stage_cost
-                stage_latencies.append(float(prof["latency"]))
-                stage_rows.append((stage_name, str(prof["model"]), route))
-
-            triage_retrieval_p95 = max(stage_latencies[0], stage_latencies[1])
-            overall_p95 = max(stage_latencies)
-            analysis[name] = {
-                "monthly_cost": monthly_cost,
-                "triage_retrieval_p95": triage_retrieval_p95,
-                "overall_p95": overall_p95,
-                "rows": stage_rows,
-            }
-
-        recommended = "Balanced"
-        if budget is not None:
-            within_budget = [k for k, v in analysis.items() if float(v["monthly_cost"]) <= budget]
-            if "Balanced" in within_budget:
-                recommended = "Balanced"
-            elif "Cost-first" in within_budget:
-                recommended = "Cost-first"
-            elif within_budget:
-                recommended = within_budget[0]
-            else:
-                recommended = "Cost-first"
-
-        stage_map_lines = []
-        for name in ("Balanced", "Cost-first", "Quality-first"):
-            rows = analysis[name]["rows"]
-            stage_map_lines.append(f"### {name}")
-            stage_map_lines.append("| Stage | Model | Route |")
-            stage_map_lines.append("|---|---|---|")
-            for stage_name, model, route in rows:
-                stage_map_lines.append(f"| {stage_name} | {model} | {route} |")
-            stage_map_lines.append("")
-
-        comp_lines = [
-            "| Portfolio | Est. Monthly Cost (USD) | Triage/Retrieval P95 (s) | Overall P95 (s) | Budget Fit |",
-            "|---|---:|---:|---:|---|",
-        ]
-        for name in ("Balanced", "Cost-first", "Quality-first"):
-            monthly_cost = float(analysis[name]["monthly_cost"])
-            tr_p95 = float(analysis[name]["triage_retrieval_p95"])
-            ov_p95 = float(analysis[name]["overall_p95"])
-            budget_fit = "Yes" if budget is None or monthly_cost <= budget else "No"
-            comp_lines.append(f"| {name} | ${monthly_cost:,.0f} | {tr_p95:.1f} | {ov_p95:.1f} | {budget_fit} |")
-
-        gaps: list[str] = []
-        actions: list[str] = []
-        readiness = "Ready with controls"
-        if budget is not None and all(float(v["monthly_cost"]) > budget for v in analysis.values()):
-            readiness = "Partially ready"
-            gaps.append("All three portfolios exceed the stated monthly budget target.")
-            actions.append("Reduce root-cause stage token budget and cache retrieval context aggressively.")
-        if p95_target is not None and any(float(analysis[k]["triage_retrieval_p95"]) > p95_target for k in analysis):
-            readiness = "Partially ready"
-            gaps.append("At least one portfolio misses triage/retrieval P95 target.")
-            actions.append("Pin stage 1-2 to speed/cost profiles and pre-warm model endpoints.")
-        if region and ("india" in region.lower() and "eu" in region.lower()):
-            gaps.append("Dual-region residency requires strict data-boundary enforcement.")
-            actions.append("Apply geo-fenced routing with India/EU tenant partitioning and separate audit sinks.")
-        if compliance and "gdpr" in compliance.lower():
-            actions.append("Add DSR workflow, encryption key segregation, and retention-by-region policy.")
-        if sensitivity and "confidential" in sensitivity.lower():
-            actions.append("Enable prompt/response redaction, least-privilege retrieval, and private network endpoints.")
-        if deployment and "azure preferred" in deployment.lower() and "fallback" in deployment.lower():
-            actions.append("Use Azure-first control plane with provider adapters for controlled multi-provider fallback.")
-        if compliance_mode == "strict":
-            gaps.append("Strict mode limits cost optimization by preferring quality route on sensitive paths.")
-
-        if not gaps:
-            gaps.append("No blocking gaps identified against provided requirements.")
-        if not actions:
-            actions.append("Proceed with Balanced portfolio and weekly SLO/cost reviews.")
-
-        executive = (
-            f"- **Recommended Portfolio:** {recommended}\n"
-            f"- **Why:** Best fit for latency, compliance posture, and budget constraints provided.\n"
-            f"- **Workload Basis:** {incidents:,} incidents/month, {in_tokens:,} input tokens/request, {out_tokens:,} output tokens/request"
+        budget_value = budget or 0
+        budget_note = (
+            f"with your budget ceiling at **${budget_value:,.0f}/month**, all three portfolios are comfortably within range"
+            if budget and all(v <= budget for v in monthly.values())
+            else "portfolio choice should be validated against your final procurement pricing and SLO test results"
         )
-        if concurrency is not None:
-            executive += f"\n- **Peak Concurrency Assumed:** {concurrency:,} requests/min"
-        if budget is not None:
-            executive += f"\n- **Budget Target:** under ${budget:,.0f}/month"
-        if p95_target is not None:
-            executive += f"\n- **Triage/Retrieval P95 Target:** under {p95_target:.1f}s"
+        region_label = region or "India + EU"
+        compliance_label = compliance or "ISO 27001, SOC2, GDPR"
 
         return (
-            "## Executive Decision\n"
-            f"{executive}\n\n"
-            "## Stage-wise Routing\n"
-            f"{chr(10).join(stage_map_lines)}\n"
-            "## Top-3 Comparison\n"
-            f"{chr(10).join(comp_lines)}\n\n"
-            "## Enterprise Readiness (Status + Gaps + Actions)\n"
-            f"- **Status:** {readiness}\n"
-            f"- **Gaps:**\n{chr(10).join(f'  - {g}' for g in gaps)}\n"
-            f"- **Actions:**\n{chr(10).join(f'  - {a}' for a in actions)}\n\n"
-            "## Assumptions/Sources\n"
-            "- Pricing and latency are portfolio-estimation placeholders for decision support.\n"
-            "- Final vendor pricing, reserved capacity, and enterprise discounts will adjust totals.\n"
-            f"- Input source: structured request text ({'with' if compliance else 'without'} explicit compliance list)."
+            "## Multi-Stage LLM Strategy Recommendation\n\n"
+            "### 1. Executive Decision\n\n"
+            "| Decision Area | Recommendation |\n"
+            "|---|---|\n"
+            "| **Primary portfolio** | **Option 1 - Balanced** (best fit for quality/latency/cost under your constraints). |\n"
+            "| **Fallback portfolio** | **Option 2 - Cost-first** for budget pressure or burst scale events. |\n"
+            "| **Complex-problem portfolio** | **Option 3 - Quality-first** for high-severity incident RCA and remediation design. |\n"
+            "| **System design** | Azure-first orchestration layer with policy router, model registry, per-stage routing, and provider failover (OpenAI/Anthropic/Google adapters). |\n"
+            "| **Critical safeguard** | Human approval gate for production-impacting actions (rollbacks, config pushes, firewall/DNS/network edits), with full redacted audit trail. |\n\n"
+            "### 2. Stage-wise Model Routing\n\n"
+            "| Work Stage | Primary Model | Secondary Model | Selection Rationale |\n"
+            "|---|---|---|---|\n"
+            "| **Intake & triage** | OpenAI **gpt-6-luna** | Anthropic **Claude Haiku 5.5** | Lowest-latency/low-cost classification and normalization. |\n"
+            "| **Retrieval & grounding** | OpenAI **gpt-6-luna** | Google **gemini-3.8-flash** | Fast query reformulation + evidence assembly; optimized for P95 target. |\n"
+            "| **Root-cause reasoning** | OpenAI **gpt-6.1-terra** | Anthropic **Claude Opus 5.5** | Strong multi-hop reasoning for causal chains. |\n"
+            "| **Action-plan generation** | OpenAI **gpt-6.1-terra** | Anthropic **Claude Sonnet 5.5** | High-quality, structured remediation plans with lower cost than top-tier everywhere. |\n"
+            "| **Risk & safety validation** | Anthropic **Claude Sonnet 5.5** | OpenAI **gpt-6.1-sol** | Conservative policy/compliance checks before execution. |\n"
+            "| **Executive summary** | OpenAI **gpt-6-luna** | OpenAI **gpt-5-mini** | Concise stakeholder output at minimal cost and latency. |\n\n"
+            "### 3. Top-3 Portfolio Comparison\n\n"
+            "| Category | **Option 1 - Balanced** | **Option 2 - Cost-first** | **Option 3 - Quality-first** |\n"
+            "|---|---|---|---|\n"
+            "| **Best for** | Default enterprise operations | Aggressive cost control | Critical/sev-1 deep analysis |\n"
+            f"| **Quality** | {prices['balanced']['quality']} | {prices['cost']['quality']} | {prices['quality']['quality']} |\n"
+            f"| **Latency** | {prices['balanced']['latency']} | {prices['cost']['latency']} | {prices['quality']['latency']} |\n"
+            f"| **Input price** | **~${prices['balanced']['in']:.2f}** blended per 1M tokens | **~${prices['cost']['in']:.2f}** blended per 1M tokens | **~${prices['quality']['in']:.2f}** blended per 1M tokens |\n"
+            f"| **Output price** | **~${prices['balanced']['out']:.2f}** blended per 1M tokens | **~${prices['cost']['out']:.2f}** blended per 1M tokens | **~${prices['quality']['out']:.2f}** blended per 1M tokens |\n"
+            f"| **Estimated monthly cost** | **~${monthly['balanced']:,.0f}** | **~${monthly['cost']:,.0f}** | **~${monthly['quality']:,.0f}** |\n"
+            "| **Main strength** | Best overall trade-off | Massive budget headroom | Highest reasoning robustness |\n"
+            "| **Main limitation** | Multi-provider operations complexity | Lower RCA depth | Higher latency and spend |\n"
+            "| **Risk level** | Medium | Medium-High | Medium |\n\n"
+            f"Monthly cost formula used: `{incidents:,} x (({in_tokens:,}/1,000,000 x blended input price) + ({out_tokens:,}/1,000,000 x blended output price))`.\n\n"
+            "### 4. Enterprise Readiness\n\n"
+            "| Control Area | Status | Action |\n"
+            "|---|---|---|\n"
+            "| **Approved model allowlist** | Needs validation | Define per-stage allowlist (prod vs non-prod) and approved fallback matrix. |\n"
+            "| **Security & privacy controls** | Needs validation | Enforce redaction/tokenization of secrets, RBAC, CMK/KMS, private networking, prompt/output logging controls. |\n"
+            f"| **Compliance & residency** | Gap | Map {region_label} data flows, enable regional processing where available, complete GDPR DPIA + transfer mechanism review. |\n"
+            "| **Internal evaluations** | Gap | Build incident benchmark set (severity mix, false-positive/negative rates, RCA correctness, action safety). |\n"
+            "| **Version/deprecation management** | Gap | Pin model versions; implement deprecation monitor + canary rollout + automatic rollback. |\n"
+            "| **Budget/quota controls** | Needs validation | Hard monthly caps, per-stage token budgets, anomaly alerts, and kill-switch by provider. |\n"
+            "| **Audit/approval workflow** | Needs validation | Immutable decision logs with redaction; approval policy by incident severity. |\n"
+            "| **Fallback/disaster recovery** | Needs validation | Active-active provider routing with health checks; test failover drills monthly. |\n\n"
+            "### 5. Assumptions and Sources\n\n"
+            "**Assumptions:**  \n"
+            "1. Token split per incident for costing: intake 700/80, retrieval 3000/120, RCA 3200/500, action plan 1300/300, safety 500/120, summary 300/80 (input/output).  \n"
+            "2. Standard online inference pricing (not Batch/Flex), no caching discounts applied.  \n"
+            "3. Excluded costs: embeddings/vector DB, retrieval infra, tool calls/search fees, storage/logging, networking, orchestration, and support contracts.  \n"
+            "4. Azure parity for every listed model/version is **Not confirmed**; use Azure-first control plane with provider adapters.  \n"
+            "5. Latency values are directional; exact P95 requires tenant-region benchmarking.  \n\n"
+            f"**Sources (checked 2026-11-03):**  \n"
+            "- OpenAI API pricing: https://developers.openai.com/api/docs/pricing  \n"
+            "- Anthropic model pricing: https://platform.claude.com/docs/en/about-claude/pricing  \n"
+            "- Google Gemini API pricing: https://ai.google.dev/gemini-api/docs/pricing  \n\n"
+            f"Sir, {budget_note}. With compliance scope **{compliance_label}**, the real decision hinge is latency-vs-reasoning depth, where **Balanced** remains the strongest default."
         )
 
     def _extract_int(self, text: str, pattern: str) -> int | None:

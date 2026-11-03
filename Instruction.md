@@ -1,33 +1,25 @@
 # Instruction Guide
 
-This guide explains exactly how to run and use the **LLM Advisor Model**.
+This is the complete usage guide for `llm_advisor`.
 
-## 1. What you need
+## 1. Prerequisites
 
-- Python 3.10+ installed
+- Python 3.10+
 - Repository cloned locally
 
-## 2. Open terminal in repo
+## 2. Run from repository root
 
 ```bash
 cd llm-advisor-model
 ```
 
-## 3. Fastest way to run
+## 3. Basic usage
 
-Single prompt:
+Single request:
 
 ```bash
 python -m llm_advisor "Create a secure enterprise AI rollout strategy"
 ```
-
-Output is automatically saved in `output/` with this naming convention:
-
-`name_compliance_date.md`
-
-Example:
-
-`enterprise_demo_strict_20261103_160101.md`
 
 Interactive mode:
 
@@ -35,13 +27,25 @@ Interactive mode:
 python -m llm_advisor --interactive
 ```
 
-Structured JSON output:
+JSON mode:
 
 ```bash
 python -m llm_advisor "Plan migration to policy routing" --json
 ```
 
-## 4. Core command options
+## 4. Saved output behavior
+
+Each run is saved automatically in `output\` with this naming format:
+
+`name_compliance_date.md`
+
+Example:
+
+`enterprise_demo_strict_20261103_170001.md`
+
+Use `--name` to control the `name` segment.
+
+## 5. Command options
 
 ```bash
 python -m llm_advisor "<your prompt>" [options]
@@ -49,74 +53,32 @@ python -m llm_advisor "<your prompt>" [options]
 
 Options:
 
-- `--interactive`  
-  Starts chat-like session until you type `exit`.
+- `--interactive`
+- `--input-file <path>`
+- `--stdin`
+- `--name <value>`
+- `--json`
+- `--backend mock|openai`
+- `--latency-budget-ms <number>`
+- `--cost-tier low|medium|high`
+- `--compliance none|standard|strict`
 
-- `--input-file <path>`  
-  Reads full prompt text from a file. Best for long structured briefs.
+## 6. Structured strategy input format
 
-- `--stdin`  
-  Reads full prompt text from standard input.
-
-- `--name <value>`  
-  Custom name prefix for saved output file.
-
-- `--json`  
-  Returns machine-readable JSON with route, triage, telemetry, and audit id.
-
-- `--backend mock|openai`  
-  `mock` is default and requires no API key.  
-  `openai` uses OpenAI-compatible `/chat/completions`.
-
-- `--latency-budget-ms <number>`  
-  Lower values bias to speed route.
-
-- `--cost-tier low|medium|high`  
-  `low` biases to cost route (unless overridden by stricter policy/risk).
-
-- `--compliance none|standard|strict`  
-  `strict` forces quality route.
-
-## 5. Routing behavior
-
-Default policy:
-
-1. **Quality** route when:
-   - compliance is strict, or
-   - compliance-sensitive risk is detected, or
-   - severity is high.
-2. **Speed** route when latency budget is below threshold.
-3. **Cost** route when cost tier is low and no stricter rule applies.
-
-Fallback sequence:
-
-- `quality -> cost -> speed`
-- `cost -> speed -> quality`
-- `speed -> cost -> quality`
-
-## 5A. Structured input format (for portfolio analysis)
-
-You can paste a structured brief with sections like:
+To get the full strategy report, provide a brief with these sections:
 
 - `Concept:`
 - `Workload:`
 - `Targets:`
 - `Need:`
 
-When these sections are present, the tool automatically returns:
-
-- Top 3 portfolio options (**Balanced, Cost-first, Quality-first**)
-- Stage-wise model mapping for **all 6 stages**
-- Cost and latency comparison
-- Enterprise readiness status with gaps and actions
-
-Run with a file:
+Example command:
 
 ```bash
-python -m llm_advisor --input-file brief.txt --compliance strict
+python -m llm_advisor --input-file examples\04-enterprise-brief-input.txt --compliance strict --name enterprise_demo
 ```
 
-Run with stdin (PowerShell):
+PowerShell stdin example:
 
 ```powershell
 @'
@@ -140,140 +102,94 @@ Top 3 portfolio options (Balanced, Cost-first, Quality-first)
 Stage-wise model mapping for all 6 stages
 Cost and latency comparison
 Enterprise readiness status with gaps/actions
-'@ | python -m llm_advisor --stdin --compliance strict
+'@ | python -m llm_advisor --stdin --compliance strict --name enterprise_demo
 ```
 
-## 6. OpenAI-compatible backend setup (optional)
+## 7. Strategy report format
 
-Windows CMD:
+For structured briefs, output sections are:
+
+1. `## Multi-Stage LLM Strategy Recommendation`
+2. `### 1. Executive Decision`
+3. `### 2. Stage-wise Model Routing`
+4. `### 3. Top-3 Portfolio Comparison`
+5. `### 4. Enterprise Readiness`
+6. `### 5. Assumptions and Sources`
+
+## 8. Route behavior
+
+Default policy:
+
+1. Quality route for strict compliance, high risk, or high severity
+2. Speed route for tight latency budgets
+3. Cost route for low-cost preference when no stricter rule applies
+
+Fallback sequence:
+
+- `quality -> cost -> speed`
+- `cost -> speed -> quality`
+- `speed -> cost -> quality`
+
+## 9. OpenAI-compatible backend (optional)
 
 ```bash
 set OPENAI_API_KEY=your_key
 set OPENAI_BASE_URL=https://api.openai.com/v1
 set OPENAI_MODEL=gpt-4o-mini
-```
-
-Then run:
-
-```bash
 python -m llm_advisor "Your prompt" --backend openai
 ```
 
-If `OPENAI_API_KEY` is missing, the command fails fast with a clear error.
+## 10. Demo files
 
-## 7. Output you will get
+`examples/` contains demo-ready assets:
 
-CLI text output includes:
+- `01-speed-route.txt`
+- `02-cost-route.txt`
+- `03-strict-compliance-route.txt`
+- `04-enterprise-brief-input.txt`
+- `04-enterprise-brief-output.md`
+- `README.md`
 
-- Selected route and model
-- Executive summary response sections:
-  - Executive Decision
-  - Stage-wise Routing
-  - Top-3 Comparison
-  - Enterprise Readiness
-  - Assumptions/Sources
-- Risk and compliance summary
-- Grounding snippets
-- Audit id
-
-JSON output includes:
-
-- `answer`
-- `route`
-- `triage`
-- `telemetry`
-- `audit_id`
-
-## 8. Audit and telemetry
-
-- Audit records are written as JSON lines (`audit_log.jsonl`) in the run location.
-- Each request gets a unique `audit_id`.
-- Telemetry includes attempted routes, selected model, latency, token estimate, and fallback usage.
-
-## 9. Examples included in this repo
-
-See `examples/`:
-
-- speed route sample
-- cost route sample
-- strict compliance route sample
-- JSON output sample
-- blocked policy sample
-- audit log sample
-
-Architecture reference:
-
-- `Architecture.md`
-- `docs/architecture-diagram.png`
-
-## 10. Run tests
+## 11. Run tests
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-## 11. Common issues
+## 12. Folder and file reference
 
-1. `No module named llm_advisor`  
-   Run the command from the repository root.
+### Root
 
-2. OpenAI backend fails  
-   Check `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and internet access.
+- `.gitignore` - ignore rules
+- `README.md` - quick overview
+- `Instruction.md` - full instructions
+- `Architecture.md` - architecture details
+- `pyproject.toml` - package metadata + script entry
 
-3. Request blocked by policy  
-   The prompt contains destructive/abuse signals. Rephrase for safe intent.
+### `llm_advisor/`
 
-## 12. Recommended usage pattern
+- `cli.py` - argument parsing, execution, output save
+- `engine.py` - orchestration pipeline
+- `generation.py` - strategy report formatter
+- `models.py` - model adapters
+- `router.py` - routing policy
+- `triage.py`, `retrieval.py`, `reasoning.py` - stage logic
+- `validator.py` - safety/validity checks
+- `fallback.py` - fallback sequencing
+- `audit.py` - JSONL audit writer
+- `telemetry.py` - telemetry structure
+- `types.py`, `config.py`, `__init__.py`, `__main__.py`
 
-1. Start with default `mock` backend.
-2. Validate behavior with `--json`.
-3. Tune `--latency-budget-ms`, `--cost-tier`, and `--compliance`.
-4. Move to `--backend openai` once policy behavior is acceptable.
+### `examples/`
 
-## 13. File details by folder
+- Demo input/output artifacts for presentations
 
-### Root folder (`/`)
+### `docs/`
 
-- `.gitignore` - ignores Python cache artifacts (`__pycache__/`, `*.pyc`).
-- `README.md` - quick overview, quickstart, and structure summary.
-- `Instruction.md` - complete operational guide (this file).
-- `Architecture.md` - design and control-flow explanation.
-- `pyproject.toml` - package metadata and CLI entry point (`llm-advisor`).
+- `architecture-diagram.png` - architecture image
 
-### Core package (`llm_advisor/`)
+### `tests/`
 
-- `__init__.py` - exports the public package interface.
-- `__main__.py` - allows `python -m llm_advisor`.
-- `types.py` - shared dataclasses for request/response contracts.
-- `config.py` - policy thresholds and model route mapping defaults.
-- `triage.py` - stage 1 classification (intent, severity, entities, risk).
-- `retrieval.py` - stage 2 grounding/snippet retrieval.
-- `reasoning.py` - stage 3 reasoning-plan construction.
-- `router.py` - policy router selecting quality/cost/speed route.
-- `validator.py` - pre-check and post-check safety/validity gates.
-- `fallback.py` - fallback chain sequencing logic.
-- `models.py` - model adapter layer (mock + OpenAI-compatible backends).
-- `generation.py` - stage 4 final response formatting.
-- `telemetry.py` - telemetry data object for route/model runtime metrics.
-- `audit.py` - JSONL audit record writer with generated audit ids.
-- `engine.py` - end-to-end orchestration across all stages.
-- `cli.py` - command-line argument parsing and execution mode handling.
-
-### Documentation assets (`docs/`)
-
-- `architecture-diagram.png` - architecture visual used by `Architecture.md`.
-
-### Sample executions (`examples/`)
-
-- `README.md` - index of sample output files and replay commands.
-- `01-speed-route.txt` - sample output for low-latency speed route.
-- `02-cost-route.txt` - sample output for low-cost route.
-- `03-strict-compliance-route.txt` - sample output for strict compliance quality route.
-- `04-json-output.json` - sample structured JSON output (`--json`).
-- `05-policy-blocked.txt` - sample blocked request message.
-- `06-audit-log-sample.jsonl` - sample audit log records.
-
-### Tests (`tests/`)
-
-- `test_router.py` - verifies route-selection policy behavior.
-- `test_engine.py` - verifies end-to-end orchestration and policy blocking.
+- `test_engine.py` - orchestration + strategy output checks
+- `test_router.py` - route policy checks
+- `test_cli.py` - output file naming checks

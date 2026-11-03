@@ -22,7 +22,7 @@ This folder is curated for a **live audience demo** with 4 clear scenarios.
 python -m llm_advisor "Build an enterprise AI routing strategy" --latency-budget-ms 800
 python -m llm_advisor "Design a cost-optimized rollout plan" --cost-tier low
 python -m llm_advisor "Design a GDPR-safe architecture for regulated workloads" --compliance strict
-python -m llm_advisor --input-file examples/04-enterprise-brief-input.txt --compliance strict
+python -m llm_advisor --input-file examples/04-enterprise-brief-input.txt --compliance strict --name enterprise_demo
 ```
 
 ## Optional: JSON output for technical audience
@@ -30,3 +30,5 @@ python -m llm_advisor --input-file examples/04-enterprise-brief-input.txt --comp
 ```bash
 python -m llm_advisor --input-file examples/04-enterprise-brief-input.txt --compliance strict --json
 ```
+
+Each execution is also saved in `output\` as `name_compliance_date.md`.

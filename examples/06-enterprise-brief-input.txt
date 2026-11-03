@@ -1,0 +1,22 @@
+Concept: Build an enterprise healthcare-operations incident copilot with multi-stage model routing.
+
+Workload:
+55,000 incidents/month
+Avg input tokens/request: 10,500
+Avg output tokens/request: 1,600
+Peak concurrency: 180 requests/min
+
+Targets:
+P95 latency under 5 seconds for triage/retrieval stages
+High reasoning quality for clinical workflow impact analysis
+Budget target: under $70,000/month
+Region: India + EU
+Compliance: ISO 27001, SOC2, GDPR, HIPAA
+Data sensitivity: internal confidential operations data with protected health context
+Deployment: Azure preferred, fallback to multi-provider allowed
+
+Need:
+Top 3 portfolio options (Balanced, Cost-first, Quality-first)
+Stage-wise model mapping for all 6 stages
+Cost and latency comparison
+Enterprise readiness status with gaps/actions

@@ -1,28 +1,28 @@
 # Demo Examples
 
-This folder is curated for a **live audience demo** with 4 clear scenarios.
+This folder is curated for a **live audience demo** with enterprise strategy scenarios.
 
-## Core examples (show these on stage)
+## Enterprise strategy examples (full report style)
 
-1. `01-speed-route.txt`  
-   Fast-response case (low latency target).
+1. `04-enterprise-brief-input.txt` + `04-enterprise-brief-output.md`  
+   Incident-resolution copilot (India + EU, GDPR/SOC2/ISO 27001).
 
-2. `02-cost-route.txt`  
-   Budget-focused routing case.
+2. `05-enterprise-brief-input.txt` + `05-enterprise-brief-output.md`  
+   Fraud-detection copilot (US + EU, PCI-DSS/GDPR/SOC2).
 
-3. `03-strict-compliance-route.txt`  
-   Compliance-first routing case.
+3. `06-enterprise-brief-input.txt` + `06-enterprise-brief-output.md`  
+   Healthcare-operations incident copilot (India + EU, HIPAA + GDPR).
 
-4. `04-enterprise-brief-output.md`  
-   Full enterprise portfolio analysis (top 3 options, 6-stage mapping, cost/latency table, readiness gaps/actions).
+4. `07-enterprise-brief-input.txt` + `07-enterprise-brief-output.md`  
+   Cloud-reliability outage copilot (India + EU + US, high concurrency).
 
 ## Demo run order (recommended)
 
 ```bash
-python -m llm_advisor "Build an enterprise AI routing strategy" --latency-budget-ms 800
-python -m llm_advisor "Design a cost-optimized rollout plan" --cost-tier low
-python -m llm_advisor "Design a GDPR-safe architecture for regulated workloads" --compliance strict
 python -m llm_advisor --input-file examples/04-enterprise-brief-input.txt --compliance strict --name enterprise_demo
+python -m llm_advisor --input-file examples/05-enterprise-brief-input.txt --compliance strict --name fraud_demo
+python -m llm_advisor --input-file examples/06-enterprise-brief-input.txt --compliance strict --name healthcare_demo
+python -m llm_advisor --input-file examples/07-enterprise-brief-input.txt --compliance strict --name reliability_demo
 ```
 
 ## Optional: JSON output for technical audience

@@ -1,0 +1,22 @@
+Concept: Build an enterprise cloud-reliability copilot for multi-region outage resolution using multi-stage model routing.
+
+Workload:
+150,000 incidents/month
+Avg input tokens/request: 11,000
+Avg output tokens/request: 1,800
+Peak concurrency: 420 requests/min
+
+Targets:
+P95 latency under 3.5 seconds for triage/retrieval stages
+High reasoning quality for dependency-chain root-cause analysis
+Budget target: under $95,000/month
+Region: India + EU + US
+Compliance: ISO 27001, SOC2, GDPR
+Data sensitivity: internal confidential production telemetry and incident artifacts
+Deployment: Azure preferred, fallback to multi-provider allowed
+
+Need:
+Top 3 portfolio options (Balanced, Cost-first, Quality-first)
+Stage-wise model mapping for all 6 stages
+Cost and latency comparison
+Enterprise readiness status with gaps/actions

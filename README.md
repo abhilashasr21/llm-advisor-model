@@ -1,120 +1,79 @@
 # LLM Advisor Model
 
-Enterprise AI Control Tower for **policy-routed multi-model orchestration** (Quality, Cost, Speed) with validation, fallback, telemetry, and auditability.
+Enterprise AI Control Tower with policy-routed multi-model orchestration and strategy-style output.
 
-## What this does
+## What it does
 
-It converts a user request into a governed execution flow:
+The tool processes each request through:
 
-1. **Triage**: classify intent, severity, entities, and risk signals.
-2. **Retrieval**: attach relevant grounding snippets.
-3. **Reasoning**: create a structured plan.
-4. **Policy Router**: select route (**Quality / Cost / Speed**) using latency, cost, risk, and compliance.
-5. **Validation Gate**: block unsafe/invalid requests.
-6. **Fallback Chain**: deterministic route fallback on model failure.
-7. **Generate**: return skill-style structured output with rationale.
-8. **Audit + Telemetry**: persist route decision and request trace.
+1. Triage (intent, severity, risk)
+2. Retrieval (grounding context)
+3. Reasoning (planning)
+4. Policy Router (quality/cost/speed route choice)
+5. Validation + fallback
+6. Generation (business-ready report)
+7. Audit + telemetry
 
-Default response format sections:
-- **Executive Decision**
-- **Stage-wise Routing**
-- **Top-3 Comparison**
-- **Enterprise Readiness**
-- **Assumptions/Sources**
+For structured briefs (`Concept`, `Workload`, `Targets`, `Need`), it outputs a full strategy report in this format:
 
-## Quick start (60 seconds)
+- `## Multi-Stage LLM Strategy Recommendation`
+- `### 1. Executive Decision`
+- `### 2. Stage-wise Model Routing`
+- `### 3. Top-3 Portfolio Comparison`
+- `### 4. Enterprise Readiness`
+- `### 5. Assumptions and Sources`
 
-No external dependencies are needed for default mock mode.
+## Quick start
 
 ```bash
 python -m llm_advisor "Create an implementation strategy for a secure multi-tenant AI assistant"
 ```
 
-Each run is also saved in `output/` using:
+## Run with structured brief input
 
-`name_compliance_date.md`  
-Example: `incident_resolution_strict_20261103_160101.md`
+```bash
+python -m llm_advisor --input-file examples\04-enterprise-brief-input.txt --compliance strict --name enterprise_demo
+```
 
-Interactive mode:
+## Output files
+
+Every run is saved automatically to `output\` as:
+
+`name_compliance_date.md`
+
+Example:
+
+`enterprise_demo_strict_20261103_170001.md`
+
+## Common command patterns
 
 ```bash
 python -m llm_advisor --interactive
-```
-
-JSON output:
-
-```bash
-python -m llm_advisor "Plan migration to policy-based routing" --json
-```
-
-Structured multi-line input (recommended for workload briefs):
-
-```bash
-python -m llm_advisor --input-file brief.txt --compliance strict
-```
-
-Optional name prefix for saved file:
-
-```bash
-python -m llm_advisor --input-file brief.txt --compliance strict --name incident_demo
-```
-
-## Route behavior examples
-
-Low latency (prefers **speed** route):
-
-```bash
 python -m llm_advisor "Need a quick answer" --latency-budget-ms 700
-```
-
-Budget constrained (prefers **cost** route):
-
-```bash
 python -m llm_advisor "Need cheapest path" --cost-tier low
-```
-
-Strict compliance (forces **quality** route):
-
-```bash
 python -m llm_advisor "Regulated workload" --compliance strict
+python -m llm_advisor "Plan migration to policy routing" --json
 ```
 
-## Optional: OpenAI-compatible backend
-
-Set environment variables (Windows):
+## Optional OpenAI-compatible backend
 
 ```bash
 set OPENAI_API_KEY=your_key
 set OPENAI_BASE_URL=https://api.openai.com/v1
 set OPENAI_MODEL=gpt-4o-mini
-```
-
-Run with hosted model backend:
-
-```bash
 python -m llm_advisor "Your prompt" --backend openai
 ```
 
-## Project structure
+## Key files
 
-- `llm_advisor/engine.py` - end-to-end orchestration
-- `llm_advisor/router.py` - policy routing logic
-- `llm_advisor/triage.py` - stage 1 triage
-- `llm_advisor/retrieval.py` - stage 2 retrieval
-- `llm_advisor/reasoning.py` - stage 3 reasoning
-- `llm_advisor/generation.py` - stage 4 generation
-- `llm_advisor/validator.py` - pre/post safety checks
-- `llm_advisor/fallback.py` - fallback sequencing
-- `llm_advisor/models.py` - model adapters (mock/openai-compatible)
-- `llm_advisor/audit.py` - JSONL audit trail writer
-- `llm_advisor/telemetry.py` - request telemetry record
-- `llm_advisor/cli.py` - user CLI interface
-- `Architecture.md` - detailed architecture and control flow
-- `Instruction.md` - complete usage instructions
-- `docs/architecture-diagram.png` - architecture diagram image
-- `examples/` - execution result samples
+- `llm_advisor/engine.py` - end-to-end orchestrator
+- `llm_advisor/generation.py` - strategy report formatter
+- `llm_advisor/cli.py` - command interface + output saving
+- `Architecture.md` - architecture reference
+- `Instruction.md` - full usage instructions
+- `examples/` - demo-ready sample inputs/outputs
 
-## Run tests
+## Tests
 
 ```bash
 python -m unittest discover -s tests -v

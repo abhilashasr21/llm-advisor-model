@@ -38,13 +38,21 @@ It routes each request to the best model profile (**Quality**, **Cost**, or **Sp
    - On failure, follows deterministic fallback order.
 
 7. **Generation**
-   - Produces final structured response with grounding and risk/compliance section.
+   - Produces report output.
+   - For structured briefs, emits:
+     - Multi-Stage LLM Strategy Recommendation
+     - Executive Decision
+     - Stage-wise Model Routing
+     - Top-3 Portfolio Comparison
+     - Enterprise Readiness
+     - Assumptions and Sources
 
 8. **Validation Gate (post-check)**
    - Ensures output is non-empty and valid.
 
 9. **Audit + Telemetry**
    - Writes route, triage summary, and runtime metrics to JSONL audit log.
+   - CLI also persists final report output to `output\name_compliance_date.md`.
 
 ## Module map
 
@@ -84,7 +92,7 @@ It routes each request to the best model profile (**Quality**, **Cost**, or **Sp
   JSONL audit writer.
 
 - `llm_advisor/cli.py`  
-  Command-line interface.
+  Command-line interface and output file saver.
 
 ## Routing policy (current defaults)
 

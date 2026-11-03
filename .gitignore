@@ -2,4 +2,4 @@ __pycache__/
 *.pyc
 audit_log.jsonl
 tests/tmp_audit.jsonl
-output/*.ms
+output/*.md

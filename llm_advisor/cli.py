@@ -107,7 +107,7 @@ def _save_output(content: str, *, name: str, compliance: str) -> Path:
     timestamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_name = _slugify(name) or "result"
     safe_compliance = _slugify(compliance) or "standard"
-    file_path = output_dir / f"{safe_name}_{safe_compliance}_{timestamp}.ms"
+    file_path = output_dir / f"{safe_name}_{safe_compliance}_{timestamp}.md"
     file_path.write_text(content, encoding="utf-8")
     return file_path
 

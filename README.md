@@ -32,8 +32,8 @@ python -m llm_advisor "Create an implementation strategy for a secure multi-tena
 
 Each run is also saved in `output/` using:
 
-`name_compliance_date.ms`  
-Example: `incident_resolution_strict_20261103_160101.ms`
+`name_compliance_date.md`  
+Example: `incident_resolution_strict_20261103_160101.md`
 
 Interactive mode:
 

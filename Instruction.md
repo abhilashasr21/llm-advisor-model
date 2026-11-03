@@ -23,11 +23,11 @@ python -m llm_advisor "Create a secure enterprise AI rollout strategy"
 
 Output is automatically saved in `output/` with this naming convention:
 
-`name_compliance_date.ms`
+`name_compliance_date.md`
 
 Example:
 
-`enterprise_demo_strict_20261103_160101.ms`
+`enterprise_demo_strict_20261103_160101.md`
 
 Interactive mode:
 

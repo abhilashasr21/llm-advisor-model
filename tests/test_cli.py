@@ -18,7 +18,7 @@ class TestCliOutputSaving(unittest.TestCase):
                 os.chdir(td)
                 path = _save_output("hello", name="incident advisor", compliance="strict")
                 self.assertTrue(path.exists())
-                self.assertEqual(path.suffix, ".ms")
+                self.assertEqual(path.suffix, ".md")
                 self.assertTrue(path.name.startswith("incident_advisor_strict_"))
                 self.assertIn("_strict_", path.name)
             finally:

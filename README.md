@@ -86,6 +86,7 @@ python -m llm_advisor "Your prompt" --backend openai
 - `llm_advisor/telemetry.py` - request telemetry record
 - `llm_advisor/cli.py` - user CLI interface
 - `Architecture.md` - detailed architecture and control flow
+- `Instruction.md` - complete usage instructions
 - `docs/architecture-diagram.png` - architecture diagram image
 - `examples/` - execution result samples
 

@@ -21,6 +21,14 @@ Single prompt:
 python -m llm_advisor "Create a secure enterprise AI rollout strategy"
 ```
 
+Output is automatically saved in `output/` with this naming convention:
+
+`name_compliance_date.ms`
+
+Example:
+
+`enterprise_demo_strict_20261103_160101.ms`
+
 Interactive mode:
 
 ```bash
@@ -49,6 +57,9 @@ Options:
 
 - `--stdin`  
   Reads full prompt text from standard input.
+
+- `--name <value>`  
+  Custom name prefix for saved output file.
 
 - `--json`  
   Returns machine-readable JSON with route, triage, telemetry, and audit id.

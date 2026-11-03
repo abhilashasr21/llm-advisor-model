@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
+import re
 import sys
 from dataclasses import asdict
 from pathlib import Path
@@ -24,6 +26,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--interactive", action="store_true", help="Start interactive chat mode")
     parser.add_argument("--input-file", help="Read prompt text from a file path")
     parser.add_argument("--stdin", action="store_true", help="Read prompt text from standard input")
+    parser.add_argument("--name", help="Name prefix for saved output file")
     return parser
 
 
@@ -46,7 +49,10 @@ def main() -> None:
         compliance=args.compliance,
     )
     result = engine.run(req)
-    _print_result(result, as_json=args.json)
+    rendered = _render_result(result, as_json=args.json)
+    print(rendered)
+    output_path = _save_output(rendered, name=args.name or prompt_text, compliance=args.compliance)
+    print(f"\nSaved: {output_path}")
 
 
 def _interactive(engine: ControlTowerEngine, args: argparse.Namespace) -> None:
@@ -65,7 +71,10 @@ def _interactive(engine: ControlTowerEngine, args: argparse.Namespace) -> None:
             compliance=args.compliance,
         )
         result = engine.run(req)
-        _print_result(result, as_json=args.json)
+        rendered = _render_result(result, as_json=args.json)
+        print(rendered)
+        output_path = _save_output(rendered, name=args.name or prompt, compliance=args.compliance)
+        print(f"\nSaved: {output_path}")
 
 
 def _resolve_prompt_text(args: argparse.Namespace) -> str:
@@ -76,21 +85,34 @@ def _resolve_prompt_text(args: argparse.Namespace) -> str:
     return " ".join(args.prompt).strip()
 
 
-def _print_result(result, *, as_json: bool) -> None:
+def _render_result(result, *, as_json: bool) -> str:
     if as_json:
-        print(
-            json.dumps(
-                {
-                    "answer": result.answer,
-                    "route": asdict(result.route),
-                    "triage": asdict(result.triage),
-                    "telemetry": result.telemetry,
-                    "audit_id": result.audit_id,
-                },
-                indent=2,
-            )
+        return json.dumps(
+            {
+                "answer": result.answer,
+                "route": asdict(result.route),
+                "triage": asdict(result.triage),
+                "telemetry": result.telemetry,
+                "audit_id": result.audit_id,
+            },
+            indent=2,
         )
-        return
 
-    print(f"\n[Route: {result.route.route} | Model: {result.route.model_name} | Audit: {result.audit_id}]")
-    print(result.answer)
+    return f"\n[Route: {result.route.route} | Model: {result.route.model_name} | Audit: {result.audit_id}]\n{result.answer}"
+
+
+def _save_output(content: str, *, name: str, compliance: str) -> Path:
+    output_dir = Path("output")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_name = _slugify(name) or "result"
+    safe_compliance = _slugify(compliance) or "standard"
+    file_path = output_dir / f"{safe_name}_{safe_compliance}_{timestamp}.ms"
+    file_path.write_text(content, encoding="utf-8")
+    return file_path
+
+
+def _slugify(value: str) -> str:
+    reduced = value.strip().lower()
+    reduced = re.sub(r"[^a-z0-9]+", "_", reduced)
+    return reduced.strip("_")[:60]

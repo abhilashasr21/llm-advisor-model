@@ -30,6 +30,11 @@ No external dependencies are needed for default mock mode.
 python -m llm_advisor "Create an implementation strategy for a secure multi-tenant AI assistant"
 ```
 
+Each run is also saved in `output/` using:
+
+`name_compliance_date.ms`  
+Example: `incident_resolution_strict_20261103_160101.ms`
+
 Interactive mode:
 
 ```bash
@@ -46,6 +51,12 @@ Structured multi-line input (recommended for workload briefs):
 
 ```bash
 python -m llm_advisor --input-file brief.txt --compliance strict
+```
+
+Optional name prefix for saved file:
+
+```bash
+python -m llm_advisor --input-file brief.txt --compliance strict --name incident_demo
 ```
 
 ## Route behavior examples

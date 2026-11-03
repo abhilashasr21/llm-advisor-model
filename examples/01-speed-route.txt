@@ -1,18 +1,28 @@
-[Route: speed | Model: model_c_speed | Audit: 2dc16a0a-7b2f-49da-b99f-52f15c60d6f7]
-## Advisor Response
-Fast answer for low-latency path.
-Prompt: Build an enterprise AI routing strategy
-Grounding: No direct grounding match; use general enterprise control-tower defaults.
+[Route: speed | Model: model_c_speed | Audit: 1a90171f-57f1-4c8d-a973-8fc5662869ca]
+## Executive Decision
+- **Selected Route:** speed (`model_c_speed`)
+- **Why:** Selected speed route to satisfy latency budget (800ms).
+- **Severity:** low
+- **Risk Flags:** none
 
-## Structured Plan
+## Stage-wise Routing
 1. Classify request intent=planning, severity=low.
 2. Select model route using policy constraints.
 3. Synthesize response with grounding snippets and action plan.
 4. Attach grounded rationale and confidence notes.
 
-## Risk & Compliance
-- Severity: low
-- Risk flags: none
+## Top-3 Comparison
+| Option | Route | Best For | Trade-off |
+|---|---|---|---|
+| 1 | Quality | Deep reasoning, strict compliance, high-risk tasks | Higher latency/cost |
+| 2 | Cost | High-volume throughput and budget control | Lower reasoning depth |
+| 3 | Speed | Low-latency, interactive responses | Concision over depth |
 
-## Grounding
-- No direct grounding match; use general enterprise control-tower defaults.
+## Enterprise Readiness
+- **Validation Gate:** Passed
+- **Fallback Triggered:** No
+- **Attempted Routes:** speed
+- **Latency (ms):** 30
+
+## Recommendation
+Fast answer for low-latency path.

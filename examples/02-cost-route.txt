@@ -1,18 +1,28 @@
-[Route: cost | Model: model_b_cost | Audit: b8a9b31b-64b4-4ad0-8f29-f75f40255df4]
-## Advisor Response
-Cost-optimized answer with concise steps and minimal token footprint.
-Prompt: Design a cost-optimized rollout plan
-Grounding: Prefer cost route for high-volume throughput and budget constraints.
+[Route: cost | Model: model_b_cost | Audit: 6358d95d-8557-4b78-a714-8b2b91353f2c]
+## Executive Decision
+- **Selected Route:** cost (`model_b_cost`)
+- **Why:** Selected cost route due to budget tier 'low'.
+- **Severity:** low
+- **Risk Flags:** none
 
-## Structured Plan
+## Stage-wise Routing
 1. Classify request intent=planning, severity=low.
 2. Select model route using policy constraints.
 3. Synthesize response with grounding snippets and action plan.
 4. Attach grounded rationale and confidence notes.
 
-## Risk & Compliance
-- Severity: low
-- Risk flags: none
+## Top-3 Comparison
+| Option | Route | Best For | Trade-off |
+|---|---|---|---|
+| 1 | Quality | Deep reasoning, strict compliance, high-risk tasks | Higher latency/cost |
+| 2 | Cost | High-volume throughput and budget control | Lower reasoning depth |
+| 3 | Speed | Low-latency, interactive responses | Concision over depth |
 
-## Grounding
-- Prefer cost route for high-volume throughput and budget constraints.
+## Enterprise Readiness
+- **Validation Gate:** Passed
+- **Fallback Triggered:** No
+- **Attempted Routes:** cost
+- **Latency (ms):** 90
+
+## Recommendation
+Cost-optimized answer with concise steps and minimal token footprint.

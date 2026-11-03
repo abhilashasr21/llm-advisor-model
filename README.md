@@ -1,17 +1,23 @@
-# LLM Advisor Model (Enterprise AI Control Tower)
+# LLM Advisor Model
 
-Policy-routed multi-model advisor based on your architecture:
+Enterprise AI Control Tower for **policy-routed multi-model orchestration** (Quality, Cost, Speed) with validation, fallback, telemetry, and auditability.
 
-- **Triage** -> classify severity, detect risk, extract entities  
-- **Retrieval** -> add grounding snippets  
-- **Reasoning** -> build a structured plan  
-- **Generate** -> produce final response  
-- **Policy Router** -> select **Quality / Cost / Speed** route  
-- **Validation Gate + Fallback Chain + Audit Trail** -> safe, resilient, traceable
+## What this does
 
-## Extremely easy usage
+It converts a user request into a governed execution flow:
 
-No dependencies required for default mode.
+1. **Triage**: classify intent, severity, entities, and risk signals.
+2. **Retrieval**: attach relevant grounding snippets.
+3. **Reasoning**: create a structured plan.
+4. **Policy Router**: select route (**Quality / Cost / Speed**) using latency, cost, risk, and compliance.
+5. **Validation Gate**: block unsafe/invalid requests.
+6. **Fallback Chain**: deterministic route fallback on model failure.
+7. **Generate**: return structured output with rationale.
+8. **Audit + Telemetry**: persist route decision and request trace.
+
+## Quick start (60 seconds)
+
+No external dependencies are needed for default mock mode.
 
 ```bash
 python -m llm_advisor "Create an implementation strategy for a secure multi-tenant AI assistant"
@@ -29,17 +35,29 @@ JSON output:
 python -m llm_advisor "Plan migration to policy-based routing" --json
 ```
 
-Tune routing behavior:
+## Route behavior examples
+
+Low latency (prefers **speed** route):
 
 ```bash
 python -m llm_advisor "Need a quick answer" --latency-budget-ms 700
+```
+
+Budget constrained (prefers **cost** route):
+
+```bash
 python -m llm_advisor "Need cheapest path" --cost-tier low
+```
+
+Strict compliance (forces **quality** route):
+
+```bash
 python -m llm_advisor "Regulated workload" --compliance strict
 ```
 
-## OpenAI-compatible backend (optional)
+## Optional: OpenAI-compatible backend
 
-Set environment variables:
+Set environment variables (Windows):
 
 ```bash
 set OPENAI_API_KEY=your_key
@@ -47,26 +65,28 @@ set OPENAI_BASE_URL=https://api.openai.com/v1
 set OPENAI_MODEL=gpt-4o-mini
 ```
 
-Then run:
+Run with hosted model backend:
 
 ```bash
 python -m llm_advisor "Your prompt" --backend openai
 ```
 
-## Architecture mapping
+## Project structure
 
-- `llm_advisor/triage.py` -> Stage 1: Triage  
-- `llm_advisor/retrieval.py` -> Stage 2: Retrieval  
-- `llm_advisor/reasoning.py` -> Stage 3: Reasoning  
-- `llm_advisor/generation.py` -> Stage 4: Generate  
-- `llm_advisor/router.py` -> Policy Router  
-- `llm_advisor/validator.py` -> Validation Gate  
-- `llm_advisor/fallback.py` -> Fallback Chain  
-- `llm_advisor/audit.py` -> Audit Trail  
-- `llm_advisor/telemetry.py` -> Latency/Cost telemetry  
-- `llm_advisor/engine.py` -> End-to-end orchestration
+- `llm_advisor/engine.py` - end-to-end orchestration
+- `llm_advisor/router.py` - policy routing logic
+- `llm_advisor/triage.py` - stage 1 triage
+- `llm_advisor/retrieval.py` - stage 2 retrieval
+- `llm_advisor/reasoning.py` - stage 3 reasoning
+- `llm_advisor/generation.py` - stage 4 generation
+- `llm_advisor/validator.py` - pre/post safety checks
+- `llm_advisor/fallback.py` - fallback sequencing
+- `llm_advisor/models.py` - model adapters (mock/openai-compatible)
+- `llm_advisor/audit.py` - JSONL audit trail writer
+- `llm_advisor/telemetry.py` - request telemetry record
+- `llm_advisor/cli.py` - user CLI interface
 
-## Tests
+## Run tests
 
 ```bash
 python -m unittest discover -s tests -v

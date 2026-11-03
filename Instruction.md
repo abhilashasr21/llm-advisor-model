@@ -100,7 +100,12 @@ If `OPENAI_API_KEY` is missing, the command fails fast with a clear error.
 CLI text output includes:
 
 - Selected route and model
-- Structured response
+- Executive summary response sections:
+  - Executive Decision
+  - Stage-wise Routing
+  - Top-3 Comparison
+  - Enterprise Readiness
+  - Assumptions & Sources
 - Risk and compliance summary
 - Grounding snippets
 - Audit id

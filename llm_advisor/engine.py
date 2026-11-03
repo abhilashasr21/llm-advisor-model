@@ -53,6 +53,8 @@ class ControlTowerEngine:
             triage=triage,
             retrieval=retrieval,
             reasoning=reasoning,
+            route=final_decision,
+            telemetry=telemetry.to_dict(),
         )
         post_errors = self.validator.post_check(answer)
         if post_errors:

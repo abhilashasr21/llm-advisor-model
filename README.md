@@ -12,8 +12,15 @@ It converts a user request into a governed execution flow:
 4. **Policy Router**: select route (**Quality / Cost / Speed**) using latency, cost, risk, and compliance.
 5. **Validation Gate**: block unsafe/invalid requests.
 6. **Fallback Chain**: deterministic route fallback on model failure.
-7. **Generate**: return structured output with rationale.
+7. **Generate**: return skill-style structured output with rationale.
 8. **Audit + Telemetry**: persist route decision and request trace.
+
+Default response format sections:
+- **Executive Decision**
+- **Stage-wise Routing**
+- **Top-3 Comparison**
+- **Enterprise Readiness**
+- **Assumptions & Sources**
 
 ## Quick start (60 seconds)
 

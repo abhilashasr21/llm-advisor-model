@@ -15,7 +15,8 @@ class TestEngine(unittest.TestCase):
                 latency_budget_ms=2500,
             )
         )
-        self.assertIn("Advisor Response", result.answer)
+        self.assertIn("Executive Decision", result.answer)
+        self.assertIn("Top-3 Comparison", result.answer)
         self.assertIn(result.route.route, {"cost", "quality", "speed"})
         self.assertTrue(result.audit_id)
 

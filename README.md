@@ -42,6 +42,12 @@ JSON output:
 python -m llm_advisor "Plan migration to policy-based routing" --json
 ```
 
+Structured multi-line input (recommended for workload briefs):
+
+```bash
+python -m llm_advisor --input-file brief.txt --compliance strict
+```
+
 ## Route behavior examples
 
 Low latency (prefers **speed** route):

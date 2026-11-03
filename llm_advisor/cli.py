@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import asdict
+from pathlib import Path
 
 from .engine import ControlTowerEngine
 from .types import AdvisorRequest
@@ -20,18 +22,25 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--compliance", choices=["none", "standard", "strict"], default="standard")
     parser.add_argument("--json", action="store_true", help="Print structured JSON output")
     parser.add_argument("--interactive", action="store_true", help="Start interactive chat mode")
+    parser.add_argument("--input-file", help="Read prompt text from a file path")
+    parser.add_argument("--stdin", action="store_true", help="Read prompt text from standard input")
     return parser
 
 
 def main() -> None:
     args = _build_parser().parse_args()
     engine = ControlTowerEngine(backend=args.backend)
-    if args.interactive or not args.prompt:
+    if args.interactive and not args.input_file and not args.stdin and not args.prompt:
+        _interactive(engine, args)
+        return
+
+    prompt_text = _resolve_prompt_text(args)
+    if not prompt_text:
         _interactive(engine, args)
         return
 
     req = AdvisorRequest(
-        prompt=" ".join(args.prompt),
+        prompt=prompt_text,
         latency_budget_ms=args.latency_budget_ms,
         cost_tier=args.cost_tier,
         compliance=args.compliance,
@@ -57,6 +66,14 @@ def _interactive(engine: ControlTowerEngine, args: argparse.Namespace) -> None:
         )
         result = engine.run(req)
         _print_result(result, as_json=args.json)
+
+
+def _resolve_prompt_text(args: argparse.Namespace) -> str:
+    if args.input_file:
+        return Path(args.input_file).read_text(encoding="utf-8").strip()
+    if args.stdin:
+        return sys.stdin.read().strip()
+    return " ".join(args.prompt).strip()
 
 
 def _print_result(result, *, as_json: bool) -> None:

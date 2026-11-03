@@ -49,6 +49,7 @@ class ControlTowerEngine:
         model_output, final_decision = self._execute_with_fallback(req, retrieval, decision, telemetry)
 
         answer = self.generation.build(
+            request=req,
             model_output=model_output,
             triage=triage,
             retrieval=retrieval,

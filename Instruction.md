@@ -44,6 +44,12 @@ Options:
 - `--interactive`  
   Starts chat-like session until you type `exit`.
 
+- `--input-file <path>`  
+  Reads full prompt text from a file. Best for long structured briefs.
+
+- `--stdin`  
+  Reads full prompt text from standard input.
+
 - `--json`  
   Returns machine-readable JSON with route, triage, telemetry, and audit id.
 
@@ -76,6 +82,55 @@ Fallback sequence:
 - `quality -> cost -> speed`
 - `cost -> speed -> quality`
 - `speed -> cost -> quality`
+
+## 5A. Structured input format (for portfolio analysis)
+
+You can paste a structured brief with sections like:
+
+- `Concept:`
+- `Workload:`
+- `Targets:`
+- `Need:`
+
+When these sections are present, the tool automatically returns:
+
+- Top 3 portfolio options (**Balanced, Cost-first, Quality-first**)
+- Stage-wise model mapping for **all 6 stages**
+- Cost and latency comparison
+- Enterprise readiness status with gaps and actions
+
+Run with a file:
+
+```bash
+python -m llm_advisor --input-file brief.txt --compliance strict
+```
+
+Run with stdin (PowerShell):
+
+```powershell
+@'
+Concept: Build an enterprise incident-resolution copilot with multi-stage model routing.
+
+Workload:
+120,000 incidents/month
+Avg input tokens/request: 9,000
+Avg output tokens/request: 1,200
+Peak concurrency: 300 requests/min
+Targets:
+P95 latency under 5 seconds for triage/retrieval stages
+High reasoning quality for root-cause analysis
+Budget target: under $85,000/month
+Region: India + EU
+Compliance: ISO 27001, SOC2, GDPR
+Data sensitivity: internal confidential production data
+Deployment: Azure preferred, fallback to multi-provider allowed
+Need:
+Top 3 portfolio options (Balanced, Cost-first, Quality-first)
+Stage-wise model mapping for all 6 stages
+Cost and latency comparison
+Enterprise readiness status with gaps/actions
+'@ | python -m llm_advisor --stdin --compliance strict
+```
 
 ## 6. OpenAI-compatible backend setup (optional)
 

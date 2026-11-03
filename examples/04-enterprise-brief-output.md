@@ -39,7 +39,7 @@
 | Stage 5: Resolution Generation | model_a_quality | quality |
 | Stage 6: Validation & Audit | model_a_quality | quality |
 
-## Cost and Latency Comparison
+## Top-3 Comparison
 | Portfolio | Est. Monthly Cost (USD) | Triage/Retrieval P95 (s) | Overall P95 (s) | Budget Fit |
 |---|---:|---:|---:|---|
 | Balanced | $16,124 | 0.9 | 3.5 | Yes |

@@ -51,7 +51,7 @@ class TestEngine(unittest.TestCase):
         result = engine.run(AdvisorRequest(prompt=prompt, compliance="strict"))
         self.assertIn("Executive Decision", result.answer)
         self.assertIn("Stage-wise Routing", result.answer)
-        self.assertIn("Cost and Latency Comparison", result.answer)
+        self.assertIn("Top-3 Comparison", result.answer)
         self.assertIn("Enterprise Readiness (Status + Gaps + Actions)", result.answer)
 
 

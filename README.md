@@ -20,7 +20,7 @@ Default response format sections:
 - **Stage-wise Routing**
 - **Top-3 Comparison**
 - **Enterprise Readiness**
-- **Assumptions & Sources**
+- **Assumptions/Sources**
 
 ## Quick start (60 seconds)
 

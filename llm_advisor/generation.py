@@ -22,49 +22,76 @@ class GenerationStage:
         risk_flags = ", ".join(triage.risk_flags) if triage.risk_flags else "none"
         entities = ", ".join(triage.entities) if triage.entities else "none"
         snippets = "\n".join(f"- {s}" for s in retrieval.snippets)
-        steps = "\n".join(f"{i + 1}. {step}" for i, step in enumerate(reasoning.steps))
         attempted_routes = telemetry.get("attempted_routes", [])
         fallback_used = telemetry.get("fallback_used", False)
         fallback_state = "Yes" if fallback_used else "No"
-
-        top3_table = (
-            "| Option | Route | Best For | Trade-off |\n"
-            "|---|---|---|---|\n"
-            "| 1 | Quality | Deep reasoning, strict compliance, high-risk tasks | Higher latency/cost |\n"
-            "| 2 | Cost | High-volume throughput and budget control | Lower reasoning depth |\n"
-            "| 3 | Speed | Low-latency, interactive responses | Concision over depth |"
-        )
 
         structured = self._build_structured_portfolio(request.prompt, request.compliance)
         if structured:
             return structured
 
+        recommended_portfolio = (
+            "Quality-first"
+            if route.route == "quality"
+            else ("Cost-first" if route.route == "cost" else "Balanced")
+        )
+        stage_map = {
+            "Balanced": ["speed", "speed", "cost", "quality", "cost", "quality"],
+            "Cost-first": ["cost", "cost", "cost", "quality", "cost", "cost"],
+            "Quality-first": ["quality", "quality", "quality", "quality", "quality", "quality"],
+        }[recommended_portfolio]
+        stage_names = [
+            "Stage 1: Triage",
+            "Stage 2: Retrieval",
+            "Stage 3: Router/Classifier",
+            "Stage 4: Root-Cause Reasoning",
+            "Stage 5: Resolution Generation",
+            "Stage 6: Validation & Audit",
+        ]
+        route_to_model = {"quality": "model_a_quality", "cost": "model_b_cost", "speed": "model_c_speed"}
+        stage_table_lines = ["| Stage | Model | Route |", "|---|---|---|"]
+        for idx, stage_name in enumerate(stage_names):
+            stage_route = stage_map[idx]
+            stage_table_lines.append(f"| {stage_name} | {route_to_model[stage_route]} | {stage_route} |")
+
+        top3_table = (
+            "| Portfolio | Focus | Est. Monthly Cost (relative) | Triage/Retrieval P95 (relative) | Enterprise Fit |\n"
+            "|---|---|---|---|---|\n"
+            "| Balanced | Mix of speed + quality | Medium | Fast | Best default for most enterprise programs |\n"
+            "| Cost-first | Spend optimization | Low | Moderate | High-volume operations with strict budget guardrails |\n"
+            "| Quality-first | Deep reasoning + controls | High | Moderate | Regulated or high-risk workflows |"
+        )
+
+        readiness_gaps = [
+            "Data residency controls should be explicitly configured for target regions.",
+            "Security and compliance controls must be mapped to production guardrails before go-live.",
+        ]
+        readiness_actions = [
+            "Enable policy router guardrails and audit retention policy.",
+            "Add redaction and least-privilege retrieval for confidential data.",
+            "Define SLO dashboards for latency/cost/quality before rollout.",
+        ]
+
         return (
             "## Executive Decision\n"
-            f"- **Selected Route:** {route.route} (`{route.model_name}`)\n"
-            f"- **Why:** {route.reason}\n"
-            f"- **Severity:** {triage.severity}\n"
-            f"- **Risk Flags:** {risk_flags}\n"
-            f"- **Traceability:** audit trail enabled\n\n"
+            f"- **Recommended Portfolio:** {recommended_portfolio}\n"
+            f"- **Primary Route:** {route.route} (`{route.model_name}`)\n"
+            f"- **Decision Basis:** {route.reason}\n"
+            f"- **Risk Posture:** severity={triage.severity}; risk_flags={risk_flags}\n\n"
             "## Stage-wise Routing\n"
-            f"{steps}\n\n"
+            f"{chr(10).join(stage_table_lines)}\n\n"
             "## Top-3 Comparison\n"
             f"{top3_table}\n\n"
             "## Enterprise Readiness\n"
-            f"- **Validation Gate:** Passed\n"
-            f"- **Fallback Triggered:** {fallback_state}\n"
-            f"- **Attempted Routes:** {', '.join(str(v) for v in attempted_routes) if attempted_routes else 'none'}\n"
-            f"- **Latency (ms):** {telemetry.get('latency_ms', 'n/a')}\n"
-            f"- **Token Estimate:** {telemetry.get('token_estimate', 'n/a')}\n\n"
-            "## Assumptions & Sources\n"
+            f"- **Status:** Ready with controls\n"
+            f"- **Gaps:**\n{chr(10).join(f'  - {g}' for g in readiness_gaps)}\n"
+            f"- **Actions:**\n{chr(10).join(f'  - {a}' for a in readiness_actions)}\n"
+            f"- **Runtime Signals:** fallback={fallback_state}; attempted_routes={', '.join(str(v) for v in attempted_routes) if attempted_routes else 'none'}; latency_ms={telemetry.get('latency_ms', 'n/a')}; token_estimate={telemetry.get('token_estimate', 'n/a')}\n\n"
+            "## Assumptions/Sources\n"
             f"- **Intent:** {triage.intent}\n"
             f"- **Entities:** {entities}\n"
             f"- **Grounding:**\n{snippets}\n\n"
-            "## Recommendation\n"
-            f"{model_output}\n\n"
-            "## Risk & Compliance Notes\n"
-            f"- **Risk Flags:** {risk_flags}\n"
-            f"- **Compliance posture:** {'strict-ready' if ('compliance-sensitive' in triage.risk_flags or route.route == 'quality') else 'standard'}"
+            f"- **Model advisory summary:** {model_output}"
         )
 
     def _build_structured_portfolio(self, prompt: str, compliance_mode: str) -> str | None:
@@ -211,13 +238,13 @@ class GenerationStage:
             f"{executive}\n\n"
             "## Stage-wise Routing\n"
             f"{chr(10).join(stage_map_lines)}\n"
-            "## Cost and Latency Comparison\n"
+            "## Top-3 Comparison\n"
             f"{chr(10).join(comp_lines)}\n\n"
             "## Enterprise Readiness (Status + Gaps + Actions)\n"
             f"- **Status:** {readiness}\n"
             f"- **Gaps:**\n{chr(10).join(f'  - {g}' for g in gaps)}\n"
             f"- **Actions:**\n{chr(10).join(f'  - {a}' for a in actions)}\n\n"
-            "## Assumptions & Sources\n"
+            "## Assumptions/Sources\n"
             "- Pricing and latency are portfolio-estimation placeholders for decision support.\n"
             "- Final vendor pricing, reserved capacity, and enterprise discounts will adjust totals.\n"
             f"- Input source: structured request text ({'with' if compliance else 'without'} explicit compliance list)."

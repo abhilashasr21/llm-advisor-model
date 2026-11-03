@@ -171,7 +171,7 @@ CLI text output includes:
   - Stage-wise Routing
   - Top-3 Comparison
   - Enterprise Readiness
-  - Assumptions & Sources
+  - Assumptions/Sources
 - Risk and compliance summary
 - Grounding snippets
 - Audit id

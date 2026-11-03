@@ -1,0 +1,10 @@
+[project]
+name = "llm-advisor-model"
+version = "0.1.0"
+description = "Enterprise AI Control Tower: policy-routed multi-model advisor"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+llm-advisor = "llm_advisor.cli:main"

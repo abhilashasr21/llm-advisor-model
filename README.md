@@ -85,6 +85,9 @@ python -m llm_advisor "Your prompt" --backend openai
 - `llm_advisor/audit.py` - JSONL audit trail writer
 - `llm_advisor/telemetry.py` - request telemetry record
 - `llm_advisor/cli.py` - user CLI interface
+- `Architecture.md` - detailed architecture and control flow
+- `docs/architecture-diagram.png` - architecture diagram image
+- `examples/` - execution result samples
 
 ## Run tests
 

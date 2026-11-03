@@ -1,5 +1,7 @@
 # Architecture
 
+![Enterprise AI Control Tower](docs/architecture-diagram.png)
+
 ## Overview
 
 The system implements an **Enterprise AI Control Tower** for policy-routed, multi-model orchestration.  

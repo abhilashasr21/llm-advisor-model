@@ -1,0 +1,19 @@
+[Route: quality | Model: model_a_quality | Audit: 6c9e7056-4f84-4609-bf72-b34ab15b6b1d]
+## Advisor Response
+High-depth answer with tradeoffs, risk notes, and implementation steps.
+Prompt: Design a GDPR-safe architecture for regulated workloads
+Grounding: Strict compliance uses quality route with full audit traceability.
+
+## Structured Plan
+1. Classify request intent=build, severity=low.
+2. Apply risk controls: compliance-sensitive.
+3. Select model route using policy constraints.
+4. Synthesize response with grounding snippets and action plan.
+5. Attach grounded rationale and confidence notes.
+
+## Risk & Compliance
+- Severity: low
+- Risk flags: compliance-sensitive
+
+## Grounding
+- Strict compliance uses quality route with full audit traceability.

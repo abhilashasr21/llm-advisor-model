@@ -1,0 +1,18 @@
+[Route: speed | Model: model_c_speed | Audit: 2dc16a0a-7b2f-49da-b99f-52f15c60d6f7]
+## Advisor Response
+Fast answer for low-latency path.
+Prompt: Build an enterprise AI routing strategy
+Grounding: No direct grounding match; use general enterprise control-tower defaults.
+
+## Structured Plan
+1. Classify request intent=planning, severity=low.
+2. Select model route using policy constraints.
+3. Synthesize response with grounding snippets and action plan.
+4. Attach grounded rationale and confidence notes.
+
+## Risk & Compliance
+- Severity: low
+- Risk flags: none
+
+## Grounding
+- No direct grounding match; use general enterprise control-tower defaults.

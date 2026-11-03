@@ -1,0 +1,18 @@
+[Route: cost | Model: model_b_cost | Audit: b8a9b31b-64b4-4ad0-8f29-f75f40255df4]
+## Advisor Response
+Cost-optimized answer with concise steps and minimal token footprint.
+Prompt: Design a cost-optimized rollout plan
+Grounding: Prefer cost route for high-volume throughput and budget constraints.
+
+## Structured Plan
+1. Classify request intent=planning, severity=low.
+2. Select model route using policy constraints.
+3. Synthesize response with grounding snippets and action plan.
+4. Attach grounded rationale and confidence notes.
+
+## Risk & Compliance
+- Severity: low
+- Risk flags: none
+
+## Grounding
+- Prefer cost route for high-volume throughput and budget constraints.
